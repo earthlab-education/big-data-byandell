@@ -1,6 +1,9 @@
 # Assignment ea-01-big-data
 
-This repository contains the notebooks for this week's assignment. Complete
+This repository contains the notebooks for this week's assignment. See
+[1. Big Data: Urban Greenspace and Asthma Prevalence](https://cu-esiil-edu.github.io/esiil-learning-portal/foundations/notebooks/11-big-data/big-data.html).
+
+Complete
 the homework in each .ipynb notebook, commit your work, and push the changes
 to github. Your instructor will pull the completed assignment after the
 deadline.
