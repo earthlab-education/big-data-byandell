@@ -83,7 +83,7 @@ see the code cell below.</li>
 </ol></div></div>
 
 
-```
+```{python}
 # Import libraries
 import os
 import pathlib
@@ -143,7 +143,7 @@ version containing only Chicago.</li>
 </ol></div></div>
 
 
-```
+```{python}
 # Set up the census tract path
 tract_dir = os.path.join(data_dir, 'chicago-tract')
 os.makedirs(tract_dir, exist_ok=True)
@@ -231,7 +231,7 @@ selecting a subset of columns.</li>
 </ol></div></div>
 
 
-```
+```{python}
 # Set up a path for the asthma data
 cdc_path = os.path.join(data_dir, 'asthma.csv')
 
@@ -283,7 +283,7 @@ your download.</li>
 </ol></div></div>
 
 
-```
+```{python}
 # Change tract identifier datatype for merging
 chi_tract_gdf.tract2010 = chi_tract_gdf.tract2010.astype('int64')
 
@@ -325,7 +325,7 @@ class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a hr
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div></div></div>
 
 
-```
+```{python}
 # Connect to the planetary computer catalog
 e84_catalog = pystac_client.Client.open(
     "https://planetarycomputer.microsoft.com/api/stac/v1"
@@ -363,7 +363,7 @@ times when you get the
 > iteration. This will help prevent long waits during debugging.
 
 
-```
+```{python}
 # Convert geometry to lat/lon for STAC
 tract_latlon_gdf = tract_cdc_gdf.to_crs(4326)
 
@@ -486,7 +486,7 @@ something to find out! You can also ask ChatGPT or the class.</li>
 </ol></div></div>
 
 
-```
+```{python}
 # Skip this step if data are already downloaded 
 if not scene_df is None:
     # Get an example tract
@@ -579,7 +579,7 @@ to cache is the computation.</p></li>
 </ol></div></div>
 
 
-```
+```{python}
 # Skip this step if data are already downloaded 
 if not scene_df is None:
     ndvi_dfs = []
@@ -673,7 +673,7 @@ income and mean NDVI across the City.
 </ul></div></div>
 
 
-```
+```{python}
 # Merge census data with geometry
 chi_ndvi_cdc_gdf = (
     tract_cdc_gdf
@@ -773,7 +773,7 @@ drop rows with <code>NaN</code> values.</li>
 </ol></div></div>
 
 
-```
+```{python}
 # Variable selection and transformation
 model_df = (
     chi_ndvi_cdc_gdf
@@ -817,7 +817,7 @@ the following plotting code as a starting point.</li>
 </ol></div></div>
 
 
-```
+```{python}
 # Select predictor and outcome variables
 
 X = model_df[['edge_density', 'mean_patch_size']]
@@ -873,7 +873,7 @@ some possible explanations for any bias you see in your model?</li>
 </ol></div></div>
 
 
-```
+```{python}
 # Compute model error for all census tracts
 model_df['pred_asthma'] = np.exp(reg.predict(X))
 model_df['err_asthma'] = model_df['pred_asthma'] - model_df['asthma']
