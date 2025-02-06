@@ -5,11 +5,17 @@ format:
     code-fold: true
 ---
 
+```{python}
+import sys
+print(sys.executable)
+print(sys.version)
+```
+
 # Urban Greenspace and Asthma Prevalence
 
-Get Started with Big Data Pipelines
+## Get Started with Big Data Pipelines
 
-Vegetation has the potential to provide many ecosystem services in Urban
+Vegetation has the potential to provide many ecosystem services in urban
 areas, such as cleaner air and water and flood mitigation.
 However, the
 results are mixed on relationships between a simple measurement of
@@ -22,7 +28,7 @@ These types of metrics include
 mean patch size, edge density, and fragmentation.
 
 Read More: Study by 
-<span class="citation" data-cites="tsai_relationships_2019">@tsai_relationships_2019</span>
+[Tsai et al. 2019](https://doi.org/10.1007/s11252-018-0813-3)
 on the relationship between edge density and life expectancy in Baltimore, MD.
 The authors also discuss the influence of scale (e.g. the resolution
 of the imagery) on these relationships, which is important for this case study.
@@ -54,7 +60,7 @@ on a very small scale.
 The NAIP data for the City of Chicago takes up about 20GB of space.
 This amount of data is likely to crash your kernel if you try to load it all
 in at once.
-It also would be inconvenient to store on your harddrive so
+It also would be inconvenient to store on your hard drive so
 that you can load it in a bit at a time for analysis.
 Even if your are
 using a computer that would be able to handle this amount of data,
@@ -64,7 +70,8 @@ years!
 To help with this problem, you will use cloud-based tools to calculate
 your statistics instead of downloading rasters to your computer or container.
 You can crop the data entirely in the cloud, thereby saving
-on your memory and internet connection, using `rioxarray`.
+on your memory and internet connection, using
+[rioxarray](https://corteva.github.io).
 
 ### Check your work with testing!
 
@@ -86,6 +93,10 @@ Import necessary packages
 [GeoTiffs](),
 we recommend some settings to make sure your code does not get stopped
 by a momentary connection lapse – see the code cell below.
+
+```{python}
+# pip install --quiet ~/Documents/GitHub/landmapy
+```
 
 ```{python}
 # Import libraries
@@ -113,13 +124,11 @@ from scipy.ndimage import label
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
 from tqdm.notebook import tqdm
+from landmapy.habitat import create_data_dir
+```
 
-data_dir = os.path.join(
-    pathlib.Path.home(),
-    'earth-analytics',
-    'data',
-    'chicago-greenspace')
-os.makedirs(data_dir, exist_ok=True)
+```{python}
+data_dir = create_data_dir('chicago-greenspace')
     
 warnings.simplefilter('ignore')
 
@@ -136,57 +145,44 @@ some modified census tracts, clipped to the city boundary, to go along
 with the health data. We’ll start by downloading the matching geographic
 data, and then select the City of Chicago.
 
+You can obtain urls for the U.S. Census Tract shapefiles from the
+[TIGER service](https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.html).
+You’ll notice that these URLs use the 
+[state FIPS](https://www.bls.gov/respondents/mwr/electronic-data-interchange/appendix-d-usps-state-abbreviations-and-fips-codes.htm),
+which you can get installing and using the 
+[us](https://pypi.org/project/us/)
+package.
+
 - Download the Census tract Shapefile that goes along with CDC places
 - Use a **row filter** to select only the census tracts in Chicago
 - Use a **conditional statement** to cache your download.
 There is no need to cache the full dataset – stick with your pared down
 version containing only Chicago.
 
+```{python}
+# from landmapy.bigdata import shp_tract_path, download_census_tract, hvplot_tract_gdf
+%run bigdata.py
+```
 
 ```{python}
 # Set up the census tract path
-tract_dir = os.path.join(data_dir, 'chicago-tract')
-os.makedirs(tract_dir, exist_ok=True)
-tract_path = os.path.join(tract_dir, 'chicago-tract.shp')
+tract_path = shp_tract_path('chicago-tract.shp')
+chi_tract_gdf = download_census_tract(tract_path, 'Chicago')
+```
 
-# Download the census tracts (only once)
-if not os.path.exists(tract_path):
-    tract_url = ('https://data.cdc.gov/download/x7zy-2xmx/application%2Fzip')
-    tract_gdf = gpd.read_file(tract_url)
-    chi_tract_gdf = tract_gdf[tract_gdf.PlaceName=='Chicago']
-    chi_tract_gdf.to_file(tract_path, index=False)
-
-# Load in the census tract data
-chi_tract_gdf = gpd.read_file(tract_path)
-
-# Site plot -- Census tracts with satellite imagery in the background
-(
-    chi_tract_gdf
-    .to_crs(ccrs.Mercator())
-    .hvplot(
-        line_color='orange', fill_color=None, 
-        crs=ccrs.Mercator(), tiles='EsriImagery',
-        frame_width=600)
-)
+```{python}
+hvplot_tract_gdf(chi_tract_gdf)
 ```
 
 **Reflect and Respond**
 
-What do you notice about the City of Chicago from the coarse
-satellite image? Is green space evenly distributed? What can you learn
-about Chicago from websites, scientific papers, or other resources that
-might help explain what you see in the site map?
+What do you notice about the City of Chicago from the coarse satellite image?
+Is green space evenly distributed? What can you learn about Chicago from websites,
+scientific papers, or other resources that might help explain what you see in the site map?
 
 **WRITE YOUR CITY OF CHICAGO DATA DESCRIPTION AND CITATION HERE**
 
 ### Download census tracts and select your urban area
-
-You can obtain urls for the U.S. Census Tract shapefiles from [the TIGER
-service](https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.html).
-You’ll notice that these URLs use the state FIPS, which you can get by
-looking it up
-(e.g. [here](https://www.bls.gov/respondents/mwr/electronic-data-interchange/appendix-d-usps-state-abbreviations-and-fips-codes.htm),
-or by installing and using the `us` package.
 
 - Download the Census tract Shapefile for the state of Illinois (IL).
 - Use a **conditional statement** to cache the download
@@ -198,29 +194,30 @@ that lie at least partially within the City of Chicago boundary.
 ### Access human health data
 
 The U.S. Center for Disease Control (CDC) provides a number of health
-variables through their [Places
-Dataset](https://www.cdc.gov/places/index.html) that might be correlated
-with urban greenspace. For this assignment, start with adult asthma. Try
-to limit the data as much as possible for download. Selecting the state
-and county is a one way to do this.
+variables through their
+[Places Dataset](https://www.cdc.gov/places/)
+that might be correlated with urban greenspace.
+For this assignment, start with adult asthma.
+Try to limit the data as much as possible for download.
+Selecting the state and county is one way to do this.
 
-- You can access Places data with an API, but as with many APIs it is
-easier to test out your search before building a URL. Navigate to the
+- Access Places data with an API, but as with many APIs it is
+easier to test out your search before building a URL.
+Navigate to the
 [Places Census Tract Data Portal](https://data.cdc.gov/500-Cities-Places/PLACES-Local-Data-for-Better-Health-Census-Tract-D)
 and search for the data you want.
 - The data portal will make an API call for you, but there is a
-simpler, easier to read and modify way to form an API call. Check out to
-the 
+simpler, easier to read and modify way to form an API call.
+Check out to the 
 [socrata documentation](https://dev.socrata.com/docs/endpoints)
-to see how. You can also find some limited examples
-and a list of available parameters for this API on
+to see how.
+You can also find some limited examples and a list of available parameters for this API on
 [CDC Places SODA Consumer API Documentation](https://dev.socrata.com/foundry/data.cdc.gov/cwsq-ngmh)
-- Once you have formed your query, you may notice that you have
-exactly 1000 rows.
+- Once you have formed your query, you may notice that you have exactly 1000 rows.
 The Places SODA API limits you to 1000 records in a
 download.
 Either narrow your search or check out the
-`&amp;$limit=` parameter to increase the number of rows
+`&$limit=` parameter to increase the number of rows
 downloaded. You can find more information on the
 [Paging page of the SODA API documentation](https://dev.socrata.com/docs/paging)
 - You should also clean up this data by renaming the
@@ -228,38 +225,8 @@ downloaded. You can find more information on the
 selecting a subset of columns.
 
 ```{python}
-# Set up a path for the asthma data
-cdc_path = os.path.join(data_dir, 'asthma.csv')
-
-# Download asthma data (only once)
-if not os.path.exists(cdc_path):
-    cdc_url = (
-        "https://data.cdc.gov/resource/cwsq-ngmh.csv"
-        "?year=2022"
-        "&stateabbr=IL"
-        "&countyname=Cook"
-        "&measureid=CASTHMA"
-        "&$limit=1500"
-    )
-    cdc_df = (
-        pd.read_csv(cdc_url)
-        .rename(columns={
-            'data_value': 'asthma',
-            'low_confidence_limit': 'asthma_ci_low',
-            'high_confidence_limit': 'asthma_ci_high',
-            'locationname': 'tract'})
-        [[
-            'year', 'tract', 
-            'asthma', 'asthma_ci_low', 'asthma_ci_high', 'data_value_unit',
-            'totalpopulation', 'totalpop18plus'
-        ]]
-    )
-    cdc_df.to_csv(cdc_path, index=False)
-
-# Load in asthma data
-cdc_df = pd.read_csv(cdc_path)
-
 # Preview asthma data
+cdc_df = download_cdc_disease(data_dir, 'asthma')
 cdc_df
 ```
 
@@ -278,25 +245,8 @@ your download.
 
 
 ```{python}
-# Change tract identifier datatype for merging
-chi_tract_gdf.tract2010 = chi_tract_gdf.tract2010.astype('int64')
-
-# Merge census data with geometry
-tract_cdc_gdf = (
-    chi_tract_gdf
-    .merge(cdc_df, left_on='tract2010', right_on='tract', how='inner')
-)
-
-# Plot asthma data as chloropleth
-(
-    gv.tile_sources.EsriImagery
-    * 
-    gv.Polygons(
-        tract_cdc_gdf.to_crs(ccrs.Mercator()),
-        vdims=['asthma', 'tract2010'],
-        crs=ccrs.Mercator()
-    ).opts(color='asthma', colorbar=True, tools=['hover'])
-).opts(width=600, height=600, xaxis=None, yaxis=None)
+tract_cdc_gdf = join_tract_cdc(chi_tract_gdf, cdc_df)
+plot_gv(tract_cdc_gdf)
 ```
 
 **Reflect and Respond**
