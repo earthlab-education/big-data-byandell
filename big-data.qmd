@@ -166,8 +166,12 @@ version containing only Chicago.
 
 ```{python}
 # Set up the census tract path
-tract_path = shp_tract_path('chicago-tract.shp')
+tract_path = shp_tract_path(data_dir, 'chicago-tract')
 chi_tract_gdf = download_census_tract(tract_path, 'Chicago')
+```
+
+```{python}
+tract_path
 ```
 
 ```{python}
