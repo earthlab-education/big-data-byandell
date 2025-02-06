@@ -154,8 +154,16 @@ which you can get installing and using the
 package.
 
 - Download the Census tract Shapefile that goes along with CDC places
-- Use a **row filter** to select only the census tracts in Chicago
+  -  `tract_path = shp_tract_path(data_dir, place='chicago-tract')`
+  -  `chi_tract_gdf = download_census_tract(tract_path, placename='Chicago')`
 - Use a **conditional statement** to cache your download.
+  - `if not os.path.exists(tract_path):`
+- Use a **row filter** to select only the census tracts in Chicago
+  - `tract_gdf[tract_gdf.PlaceName == placename]`
+- Use a **spatial join** to select only the Census tracts
+that lie at least partially within the City of Chicago boundary.
+  - **_Not sure what this means._**
+
 There is no need to cache the full dataset – stick with your pared down
 version containing only Chicago.
 
@@ -168,10 +176,6 @@ version containing only Chicago.
 # Set up the census tract path
 tract_path = shp_tract_path(data_dir, 'chicago-tract')
 chi_tract_gdf = download_census_tract(tract_path, 'Chicago')
-```
-
-```{python}
-tract_path
 ```
 
 ```{python}
@@ -190,8 +194,6 @@ scientific papers, or other resources that might help explain what you see in th
 
 - Download the Census tract Shapefile for the state of Illinois (IL).
 - Use a **conditional statement** to cache the download
-- Use a **spatial join** to select only the Census tracts
-that lie at least partially within the City of Chicago boundary.
 
 ## STEP 3 - Access Asthma and Urban Greenspaces Data
 
@@ -816,5 +818,12 @@ your results?
 ### References
 
 Tsai, Wei-Lun, Yu-Fai Leung, Melissa R. McHale, Myron F. Floyd, and Brian J. Reich. 2019. “Relationships Between Urban Green Land Cover and Human Health at Different Spatial Resolutions.” Urban Ecosystems 22 (2): 315–24. <https://doi.org/10.1007/s11252-018-0813-3>.
+
+### Files
+
+```{bash}
+#!/bin/bash
+ls -Rlh /Users/brianyandell/earth-analytics/data/chicago-greenspace 
+```
 
 **DESCRIBE AND INTERPRET YOUR IMAGE HERE**
