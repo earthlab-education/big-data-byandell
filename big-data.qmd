@@ -50,8 +50,8 @@ could easily use a source of multispectral data like Landsat (30m) or
 even MODIS (250m) without a noticeable impact on our results.
 However, because we need to know more about the structure of green space within
 each tract, we need higher resolution data. For that, we will access the
-National Agricultural Imagery Program (NAIP) data, which is taken for
-the continental US every few years at 1m resolution.
+[National Agricultural Imagery Program (NAIP)](https://naip-usdaonline.hub.arcgis.com/)
+data, which is taken for the continental US every few years at 1m resolution.
 That’s enough to see individual trees and cars!
 The main purpose of the NAIP data is, as the name suggests, agriculture.
 However, it’s also a great source for urban areas where lots is happening
@@ -90,7 +90,7 @@ Import necessary packages
 
 - Create **reproducible file paths** for your project file structure.
 - To use cloud-optimized 
-[GeoTiffs](),
+[GeoTiffs](https://www.earthdata.nasa.gov/about/esdis/esco/standards-practices/geotiff),
 we recommend some settings to make sure your code does not get stopped
 by a momentary connection lapse – see the code cell below.
 
@@ -124,10 +124,12 @@ from scipy.ndimage import label
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
 from tqdm.notebook import tqdm
-from landmapy.habitat import create_data_dir
 ```
 
 ```{python}
+import os
+import warnings
+from landmapy.habitat import create_data_dir
 data_dir = create_data_dir('chicago-greenspace')
     
 warnings.simplefilter('ignore')
@@ -139,10 +141,12 @@ os.environ["GDAL_HTTP_RETRY_DELAY"] = "1"
 
 ## STEP 2: Create a site map
 
-We’ll be using the Center for Disease Control (CDC) Places dataset for
-human health data to compare with vegetation. CDC Places also provides
-some modified census tracts, clipped to the city boundary, to go along
-with the health data. We’ll start by downloading the matching geographic
+We use the 
+[Center for Disease Control (CDC) Places](https://www.cdc.gov/places)
+dataset for human health data to compare with vegetation.
+CDC Places also provides some modified census tracts,
+clipped to the city boundary, to go along with the health data.
+We start by downloading the matching geographic
 data, and then select the City of Chicago.
 
 You can obtain urls for the U.S. Census Tract shapefiles from the
@@ -168,8 +172,10 @@ There is no need to cache the full dataset – stick with your pared down
 version containing only Chicago.
 
 ```{python}
-# from landmapy.bigdata import shp_tract_path, download_census_tract, hvplot_tract_gdf
-%run bigdata.py
+# from landmapy.cdcplaces import shp_tract_path, download_census_tract
+# from landmapy.cdcplaces import hvplot_tract_gdf download_cdc_disease
+# from landmapy.cdcplaces import join_tract_cdc plot_gdf_gv
+%run cdcplaces.py
 ```
 
 ```{python}
@@ -252,7 +258,7 @@ your download.
 
 ```{python}
 tract_cdc_gdf = join_tract_cdc(chi_tract_gdf, cdc_df)
-plot_gv(tract_cdc_gdf)
+plot_gdf_gv(tract_cdc_gdf)
 ```
 
 **Reflect and Respond**
@@ -266,33 +272,17 @@ any patterns you see?
 
 ### Get Data URLs
 
-NAIP data are freely available through the Microsoft Planetary Computer
-SpatioTemporal Access Catalog (STAC).
+NAIP data are freely available through the 
+[Microsoft Planetary Computer](https://planetarycomputer.microsoft.com/)
+[SpatioTemporal Access Catalog (STAC)](https://stacspec.org/en).
 
-Get started with STAC by accessing the planetary computer catalog
-with the following code:</p>
-
-```{python}
-# Connect to the planetary computer catalog
-e84_catalog = pystac_client.Client.open(
-    "https://planetarycomputer.microsoft.com/api/stac/v1"
-)
-e84_catalog.title
-```
-
-- Using a loop, for each Census Tract:
-  - Use the following sample code to search for data, replacing the
-names with applicable values with descriptive names:
-
-```
-search = e84_catalog.search(
-    collections=["naip"],
-    intersects=shapely.to_geojson(tract_geometry),
-    datetime=f"{year}"
-)
-```
-
-  - Access the url using `search.assets['image'].href`
+- Access planetary computer catalog via
+`pystac_client.Client.open()`
+- Loop across census tract to `.search()` for NAP data
+  - `collections=["naip"]`
+  - `intersects=shapely.to_geojson(tract_geometry)`
+  - `datetime=f"{year}"`
+- Access URL using `search.assets['image'].href`
 - Accumulate the urls in a `pd.DataFrame` or `dict` for later
 - Occasionally you may find that the STAC service is momentarily unavailable.
 You should include code that will retry the request up to 5
@@ -305,67 +295,11 @@ times when you get the `pystac_client.exceptions.APIError`
 > to add a `break` into your loop to stop the loop after a single
 > iteration. This will help prevent long waits during debugging.
 
+```{python}
+```
 
 ```{python}
-# Convert geometry to lat/lon for STAC
-tract_latlon_gdf = tract_cdc_gdf.to_crs(4326)
-
-# Define a path to save NDVI stats
-ndvi_stats_path = os.path.join(data_dir, 'chicago-ndvi-stats.csv')
-
-# Check for existing data - do not access duplicate tracts
-downloaded_tracts = []
-if os.path.exists(ndvi_stats_path):
-    ndvi_stats_df = pd.read_csv(ndvi_stats_path)
-    downloaded_tracts = ndvi_stats_df.tract.values
-else:
-    print('No census tracts downloaded so far')
-    
-# Loop through each census tract
-scene_dfs = []
-for i, tract_values in tqdm(tract_latlon_gdf.iterrows()):
-    tract = tract_values.tract2010
-    # Check if statistics are already downloaded for this tract
-    if not (tract in downloaded_tracts):
-        # Retry up to 5 times in case of a momentary disruption
-        i = 0
-        retry_limit = 5
-        while i < retry_limit:
-            # Try accessing the STAC
-            try:
-                # Search for tiles
-                naip_search = e84_catalog.search(
-                    collections=["naip"],
-                    intersects=shapely.to_geojson(tract_values.geometry),
-                    datetime="2021"
-                )
-                
-                # Build dataframe with tracts and tile urls
-                scene_dfs.append(pd.DataFrame(dict(
-                    tract=tract,
-                    date=[pd.to_datetime(scene.datetime).date() 
-                          for scene in naip_search.items()],
-                    rgbir_href=[scene.assets['image'].href for scene in naip_search.items()],
-                )))
-                
-                break
-            # Try again in case of an APIError
-            except pystac_client.exceptions.APIError:
-                print(
-                    f'Could not connect with STAC server. '
-                    f'Retrying tract {tract}...')
-                time.sleep(2)
-                i += 1
-                continue
-    
-# Concatenate the url dataframes
-if scene_dfs:
-    scene_df = pd.concat(scene_dfs).reset_index(drop=True)
-else:
-    scene_df = None
-
-# Preview the URL DataFrame
-scene_df
+chi_tracts = download_naip_tracts(data_dir, place = 'chicago')
 ```
 
 ### Compute NDVI Statistics

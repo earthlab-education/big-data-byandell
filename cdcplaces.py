@@ -1,3 +1,11 @@
+"""
+shp_tract_path: Set tract path
+download_census_tract: Download the census tracts
+hvplot_tract_gdf: HV plot census tracts with satellite imagery background
+download_cdc_disease: Download CDC Disease data
+join_tract_cdc: Join Census Tract and CDC Disease Data
+plot_gdf_gv: Plot asthma data as chloropleth
+"""
 def shp_tract_path(data_dir, place = 'chicago-tract'):
     """
     Set tract path.
@@ -46,7 +54,7 @@ def download_census_tract(tract_path,
 
 def hvplot_tract_gdf(place_tract_gdf):
     """
-    Site plot -- Census tracts with satellite imagery in the background.
+    HV plot census tracts with satellite imagery background.
     
     Args:
         place_tract_gdf (GeoDataFrame): gdf for place
@@ -155,7 +163,7 @@ def join_tract_cdc(place_tract_gdf, cdc_df):
 
 # tract_cdc_gdf = join_tract_cdc(place_tract_gdf, cdc_df)
 
-def plot_gv(tract_cdc_gdf):
+def plot_gdf_gv(tract_cdc_gdf):
     """
     Plot asthma data as chloropleth.
 
