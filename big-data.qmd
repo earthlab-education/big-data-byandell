@@ -98,7 +98,7 @@ by a momentary connection lapse – see the code cell below.
 # pip install --quiet ~/Documents/GitHub/landmapy
 ```
 
-```{python}
+```
 # Import libraries
 import os
 import pathlib
@@ -296,37 +296,44 @@ times when you get the `pystac_client.exceptions.APIError`
 > iteration. This will help prevent long waits during debugging.
 
 ```{python}
+# from landmapy.naip import naip_path, download_naip_tracks, ndvi_naip_df
+%run naip.py
 ```
 
 ```{python}
-chi_tracts = download_naip_tracts(data_dir, place = 'chicago')
+naip_stats_path = naip_path(data_dir, 'chicago')
+chi_tracts_df = download_naip_tracts(naip_stats_path, tract_cdc_gdf)
+chi_tracts_df.tract.values
 ```
 
-### Compute NDVI Statistics
+### Compute NDVI Index Statistics
 
-Next, calculate some metrics to get at different aspects of the
+Calculate some metrics to get at different aspects of the
 distribution of greenspace in each census tract.
-These types of statistics are called **fragmentation statistics**, and can be
-implemented with the `scipy` package. Some examples of fragmentation
-statistics are:
+These **fragmentation statistics** can be implemented with the 
+[scipy](https://scipy.org/)
+package.
+Some examples include:
 
 - Percentage vegetation:  
-The percentage of pixels that exceed a vegetation threshold (.12 is
-common with Landsat) Mean patch size
+percent pixels that exceed a vegetation threshold
+(.12 is common with Landsat)
 - Patches:
-The average size of **patches**, or contiguous area exceeding the
-vegetation threshold. Patches can be identified with the `label`
-function from `scipy.ndimage` Edge density
+average size of **patches**, or contiguous area,
+exceeding the vegetation threshold.
+Patches can be identified with the `label`
+function from `scipy.ndimage`
 - Edges:
-The proportion of edge pixels among vegetated pixels. Edges can be
-identified by **convolving** the image with a **kernel** designed to
+proportion of edge pixels among vegetated pixels.
+Edges can be identified by **convolving** the image with a
+**kernel** designed to
 detect pixels that are different from their surroundings.
 
 > **What is convolution?**
 >
-> If you are familiar with differential equations, convolution is an
-> approximation of the LaPlace transform.
->
+> Referring to differential equations,
+> convolution is an approximation of the
+> [Laplace transform](https://mathworld.wolfram.com/LaplaceTransform.html).
 > For the purposes of calculating edge density, convolution means that
 > we are taking all the possible 3x3 chunks for our image, and
 > multiplying it by the kernel:
@@ -341,85 +348,24 @@ detect pixels that are different from their surroundings.
 > $$
 >
 > The result is a matrix the same size as the original, minus the
-> outermost edge. If the center pixel is the same as the surroundings,
+> outermost edge.
+> If the center pixel is the same as the surroundings,
 > its value in the final matrix will be
-> $-8 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 = 0$. If it is higher than the
-> surroundings, the result will be negative, and if it is lower than the
-> surroundings, the result will be positive. As such, the edge pixels of
-> our patches will be negative.
+> $-8 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 = 0$.
+> If it is higher than the surroundings, the result will be negative,
+> and if it is lower than the surroundings, the result will be positive.
+> As such, the edge pixels of our patches will be negative.
 
 - Select census row(s)
   - Select a single row from the census tract `GeoDataFrame`
-using e.g. `.loc[[0]]`
+using e.g. `.loc[[0]]`.
   - Select all the rows from your URL `DataFrame` that match the census tract.
-- For each URL in crop, merge, clip, and compute NDVI for that census
-tract
-- Set a threshold to get a binary mask of vegetation
-- Using the sample code to compute the fragmentation statistics.
+- For each URL, crop, merge, clip, and compute NDVI for that census tract.
+- Set a threshold to get a binary mask of vegetation.
+- Use sample code to compute the fragmentation statistics.
+
 Feel free to add any other statistics you think are relevant, but make sure
 to include a fraction vegetation, mean patch size, and edge density.
-If you are not sure what any line of code is doing, make a plot or print
-something to find out! 
-You can also ask ChatGPT or the class.
-
-```{python}
-# Skip this step if data are already downloaded 
-if not scene_df is None:
-    # Get an example tract
-    tract = chi_tract_gdf.loc[0].tract2010
-    ex_scene_gdf = scene_df[scene_df.tract==tract]
-
-    # Loop through all images for tract
-    tile_das = []
-    for _, href_s in ex_scene_gdf.iterrows():
-        # Open vsi connection to data
-        tile_da = rxr.open_rasterio(
-            href_s.rgbir_href, masked=True).squeeze()
-        
-        # Crop data to the bounding box of the census tract
-        boundary = (
-            tract_cdc_gdf
-            .set_index('tract2010')
-            .loc[[tract]]
-            .to_crs(tile_da.rio.crs)
-            .geometry
-        )
-        crop_da = tile_da.rio.clip_box(
-            *boundary.envelope.total_bounds,
-            auto_expand=True)
-
-        # Clip data to the boundary of the census tract
-        clip_da = crop_da.rio.clip(boundary, all_touched=True)
-            
-        # Compute NDVI
-        ndvi_da = (
-            (clip_da.sel(band=4) - clip_da.sel(band=1)) 
-            / (clip_da.sel(band=4) + clip_da.sel(band=1))
-        )
-
-        # Accumulate result
-        tile_das.append(ndvi_da)
-
-    # Merge data
-    scene_da = rxrmerge.merge_arrays(tile_das)
-
-    # Mask vegetation
-    veg_mask = (scene_da>.3)
-
-    # Calculate mean patch size
-    labeled_patches, num_patches = label(veg_mask)
-    # Count patch pixels, ignoring background at patch 0
-    patch_sizes = np.bincount(labeled_patches.ravel())[1:]
-    mean_patch_size = patch_sizes.mean()
-
-    # Calculate edge density
-    kernel = np.array([
-        [1, 1, 1], 
-        [1, -8, 1], 
-        [1, 1, 1]])
-    edges = convolve(veg_mask, kernel, mode='constant')
-    edge_density = np.sum(edges != 0) / veg_mask.size
-```
 
 ### Repeat for all tracts
 
@@ -447,90 +393,29 @@ that step can take a few minutes as well.
 However, the important thing to cache is the computation.
 
 ```{python}
-# Skip this step if data are already downloaded 
-if not scene_df is None:
-    ndvi_dfs = []
-    # Loop through the census tracts with URLs
-    for tract, tract_date_gdf in tqdm(scene_df.groupby('tract')):
-        # Open all images for tract
-        tile_das = []
-        for _, href_s in tract_date_gdf.iterrows():
-            # Open vsi connection to data
-            tile_da = rxr.open_rasterio(
-                href_s.rgbir_href, masked=True).squeeze()
-            
-            # Clip data
-            boundary = (
-                tract_cdc_gdf
-                .set_index('tract2010')
-                .loc[[tract]]
-                .to_crs(tile_da.rio.crs)
-                .geometry
-            )
-            crop_da = tile_da.rio.clip_box(
-                *boundary.envelope.total_bounds,
-                auto_expand=True)
-            clip_da = crop_da.rio.clip(boundary, all_touched=True)
-                
-            # Compute NDVI
-            ndvi_da = (
-                (clip_da.sel(band=4) - clip_da.sel(band=1)) 
-                / (clip_da.sel(band=4) + clip_da.sel(band=1))
-            )
+ndvi_stats_df = ndvi_naip_df(naip_stats_path, tract_cdc_gdf, chi_tracts_df)
+```
 
-            # Accumulate result
-            tile_das.append(ndvi_da)
+```{python}
+%store ndvi_stats_df
+```
 
-        # Merge data
-        scene_da = rxrmerge.merge_arrays(tile_das)
-
-        # Mask vegetation
-        veg_mask = (scene_da>.3)
-
-        # Calculate statistics and save data to file
-        total_pixels = scene_da.notnull().sum()
-        veg_pixels = veg_mask.sum()
-
-        # Calculate mean patch size
-        labeled_patches, num_patches = label(veg_mask)
-        # Count patch pixels, ignoring background at patch 0
-        patch_sizes = np.bincount(labeled_patches.ravel())[1:] 
-        mean_patch_size = patch_sizes.mean()
-
-        # Calculate edge density
-        kernel = np.array([
-            [1, 1, 1], 
-            [1, -8, 1], 
-            [1, 1, 1]])
-        edges = convolve(veg_mask, kernel, mode='constant')
-        edge_density = np.sum(edges != 0) / veg_mask.size
-        
-        # Add a row to the statistics file for this tract
-        pd.DataFrame(dict(
-            tract=[tract],
-            total_pixels=[int(total_pixels)],
-            frac_veg=[float(veg_pixels/total_pixels)],
-            mean_patch_size=[mean_patch_size],
-            edge_density=[edge_density]
-        )).to_csv(
-            ndvi_stats_path, 
-            mode='a', 
-            index=False, 
-            header=(not os.path.exists(ndvi_stats_path))
-        )
-
-# Re-load results from file
-ndvi_stats_df = pd.read_csv(ndvi_stats_path)
-ndvi_stats_df
+```{python}
+%store -r ndvi_stats_df
+try:
+    ndvi_stats_df
+except NameError:
+    ndvi_stats_df = ndvi_naip_df(naip_stats_path, tract_cdc_gdf, chi_tracts_df)
+    %store ndvi_stats_df
 ```
 
 ## STEP 3 - Explore your data with plots
 
 ### Chloropleth plots
 
-Before running any statistical models on your data, you should check
-that your download worked. You should see differences in both median
-income and mean NDVI across the City.
+Before running any statistical models on your data,
+check that your download worked.
+You should see differences in both median income and mean NDVI across the city.
 
 Create a plot that contains:
 
@@ -539,28 +424,8 @@ Create a plot that contains:
 - Make sure to include a title and labeled color bars
 
 ```{python}
-# Merge census data with geometry
-chi_ndvi_cdc_gdf = (
-    tract_cdc_gdf
-    .merge(
-        ndvi_stats_df,
-        left_on='tract2010', right_on='tract', how='inner')
-)
-
-# Plot chloropleths with vegetation statistics
-def plot_chloropleth(gdf, **opts):
-    """Generate a chloropleth with the given color column"""
-    return gv.Polygons(
-        gdf.to_crs(ccrs.Mercator()),
-        crs=ccrs.Mercator()
-    ).opts(xaxis=None, yaxis=None, colorbar=True, **opts)
-
-(
-    plot_chloropleth(
-        chi_ndvi_cdc_gdf, color='asthma', cmap='viridis')
-    + 
-    plot_chloropleth(chi_ndvi_cdc_gdf, color='edge_density', cmap='Greens')
-)
+ndvi_cdc_gdf = merge_ndvi_cdc(tract_cdc_gdf, ndvi_stats_df)
+plot_ndvi_stats(ndvi_cdc_gdf)
 ```
 
 
@@ -637,25 +502,8 @@ drop rows with `NaN` values.
 - Explain any data transformations or selections you made and why
 
 ```{python}
-# Variable selection and transformation
-model_df = (
-    chi_ndvi_cdc_gdf
-    .copy()
-    [['frac_veg', 'asthma', 'mean_patch_size', 'edge_density', 'geometry']]
-    .dropna()
-)
-
-model_df['log_asthma'] = np.log(model_df.asthma)
-
-# Plot scatter matrix to identify variables that need transformation
-hvplot.scatter_matrix(
-    model_df
-    [[ 
-        'mean_patch_size',
-        'edge_density',
-        'log_asthma'
-    ]]
-    )
+ndvi_cdc_hv = vartrans(ndvi_cdc_gdf)
+ndvi_cdc_hv
 ```
 
 **EXPLAIN YOUR SELECTION AND TRANSFORMATION PROCESS HERE**

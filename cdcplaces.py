@@ -32,7 +32,7 @@ def download_census_tract(tract_path,
     Download the census tracts (only once)
     
     Args:
-        tract_path (char): address of tract
+        tract_path (str): address of tract
         
     Returns:
         place_tract_gdf (GeoDataFrame): gdf for place
@@ -91,7 +91,7 @@ def download_cdc_disease(data_dir,
     Download CDC Disease data
 
     Args:
-        data_dir (char): data directory
+        data_dir (str): data directory
         disease (str, optional): name of disease
         year (str, optional): data year
         state (str, optional): state abbreviation
@@ -100,7 +100,7 @@ def download_cdc_disease(data_dir,
         limit (str, optional): limit to narrow search
 
     Returns:
-        cdc_df: DataFrame
+        cdc_df (df): DataFrame
     """
     import os
     import pandas as pd
