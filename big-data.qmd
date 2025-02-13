@@ -398,22 +398,16 @@ There are many approaches to this, but we actually recommend implementing your c
 in the previous cell when you generate your dataframe of URLs, since
 that step can take a few minutes as well.
 However, the important thing to cache is the computation.
+Basically, URLs are saved via StoreMagic in `chi_scenes_df`,
+while NDVI computations are stored in CSV file at
+`naip_index_path`;
+after computations, `ndvi_naip_df()`
+(**need better name**)
+returns the `DataFrame`
+`ndvi_index_df`.
 
 ```{python}
-ndvi_stats_df = ndvi_naip_df(naip_stats_path, tract_cdc_gdf, chi_scenes_df)
-```
-
-```{python}
-%store ndvi_stats_df
-```
-
-```{python}
-%store -r ndvi_stats_df
-try:
-    ndvi_stats_df
-except NameError:
-    ndvi_stats_df = ndvi_naip_df(naip_stats_path, tract_cdc_gdf, chi_tracts_df)
-    %store ndvi_stats_df
+ndvi_index_df = ndvi_naip_df(naip_index_path, tract_cdc_gdf, chi_scenes_df)
 ```
 
 ## STEP 3 - Explore your data with plots
