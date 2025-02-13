@@ -270,7 +270,7 @@ any patterns you see?
 
 **ADD YOUR CDC PLACES DESCRIPTION AND CITATION HERE**
 
-### Get Data URLs
+### Get NAIP Data URLs
 
 NAIP data are freely available through the 
 [Microsoft Planetary Computer](https://planetarycomputer.microsoft.com/)
@@ -304,22 +304,13 @@ Download NAIP scenes if not done already.
 Might want special case if some index values already downloaded.
 
 ```{python}
+naip_index_path = naip_path(data_dir, 'chicago')    
 %store -r chi_scenes_df
 try:
     chi_scenes_df
 except NameError:
-    naip_index_path = naip_path(data_dir, 'chicago')
     chi_scenes_df = download_naip_scenes(naip_index_path, tract_cdc_gdf)
     %store chi_scenes_df
-```
-
-Following does not work because file does not exist.
-
-```{python}
-naip_index_path = naip_path(data_dir, 'chicago')
-naip_index_df = pd.read_csv(naip_index_path)
-downloaded_tracts = naip_index_df.tract.values
-downloaded_tracts
 ```
 
 ### Compute NDVI Index Statistics
