@@ -201,7 +201,7 @@ scientific papers, or other resources that might help explain what you see in th
 - Download the Census tract Shapefile for the state of Illinois (IL).
 - Use a **conditional statement** to cache the download
 
-## STEP 3 - Access Asthma and Urban Greenspaces Data
+## STEP 3: Access Asthma and Urban Greenspaces Data
 
 ### Access human health data
 
@@ -433,7 +433,7 @@ Following is duplicated in `naip.py`
 ndvi_index_df = ndvi_naip_df(naip_index_path, tract_cdc_gdf, chi_scenes_df)
 ```
 
-## STEP 3 - Explore your data with plots
+## STEP 4: Explore your data with plots
 
 ### Chloropleth plots
 
@@ -461,7 +461,7 @@ context of your analysis) if applicable.
 
 **ADD YOUR PLOT DESCRIPTION HERE**
 
-## STEP 4: Explore a linear ordinary least-squares regression
+## STEP 5: Explore a linear ordinary least-squares regression
 
 ### Model description
 
@@ -476,9 +476,9 @@ appropriate for the model.
 Write a model description for the linear ordinary least-squares
 regression that touches on:
 
-- Assumptions made about the data
-- What is the objective of this model? What metrics could you use to
-evaluate the fit?
+- What assumptions are made about the data?
+- What is the objective of this model?
+- What metrics could you use to evaluate the fit?
 - Advantages and potential problems with choosing this model.
 
 **ADD YOUR CDC PLACES DESCRIPTION AND CITATION HERE**
@@ -488,41 +488,38 @@ evaluate the fit?
 When fitting statistical models, you should make sure that your data
 meet the model assumptions through a process of selection and/or
 transformation.
+You can select data in various ways:
 
-You can select data by:
+- Eliminate observations (rows) or variables (columns) with missing data
+- Select model matching how variables are correlated
+  - linear models are not good at modeling circles
+- Select variables that explain most of variability in response
 
--   Eliminating observations (rows) or variables (columns) that are
-    missing data
--   Selecting a model that matches the way in which variables are
-    related to each other (for example, linear models are not good at
-    modeling circles)
--   Selecting variables that explain the largest amount of variability
-    in the dependent variable.
+You can transform data:
 
-You can transform data bt:
-
--   Transforming a variable so that it follows a normal distribution.
-    The `log` transform is the most common to eliminate excessive skew
-    (e.g. make the data symmetrical), but you should select a transform
-    most suited to your data.
--   Normalizing or standardizing variables to, for example, eliminate
-    negative numbers or effects caused by variables being in a different
-    range.
--   Performing a principle component analysis (PCA) to eliminate
-    multicollinearity among the predictor variables
+- transform while preserving order to better follow a bell shape (normal)
+or stabilize variance
+  - `log` to manage right skew
+[sklearn.preprocessing.PowerTransformer](https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.PowerTransformer.html)
+  - automated transformation choice schemes:
+[Box-Cox](https://www.geeksforgeeks.org/box-cox-transformation-using-python/) 
+and
+[Bickel-Doksum](https://doi.org/10.2307/2287831)
+  - offset and/or rescale to overcome negative numbers or effects caused by different ranges
+(e.g. `log(x - min(x) + 1)` or `(x - min(x))/(max(x) - min(x))`)
+- dimension reduction (e.g. principle component analysis (PCA))
+to reduce multicollinearity among the predictors
 
 > **Tip**
 >
 > Keep in mind that data transforms like a log transform or a PCA must
-> be reversed after modeling for the results to be meaningful.
+> be reversed (or rescaled) after modeling for the results to be meaningful.
 
-- Use the `hvplot.scatter_matrix()` function to create an
-exploratory plot of your data.
-- Make any necessary adjustments to your data to make sure that they
-meet the assumptions of a linear OLS regression.
-- Check if there are `NaN` values, and if so drop those
-rows and/or columns. You can use the `.dropna()` method to
-drop rows with `NaN` values.
+- Use `hvplot.scatter_matrix()` to create an
+exploratory plot of data.
+- Adjust data to address issues with linear model assumptions.
+- Check for `NaN` values, and drop rows and/or columns.
+Use the `.dropna()` method to drop rows with `NaN` values.
 - Explain any data transformations or selections you made and why
 
 ```{python}
@@ -621,9 +618,12 @@ What do you notice about your model from looking at the error plots?
 What additional data, transformations, or model type might help improve
 your results?
 
-### References
+## References
 
 Tsai, Wei-Lun, Yu-Fai Leung, Melissa R. McHale, Myron F. Floyd, and Brian J. Reich. 2019. “Relationships Between Urban Green Land Cover and Human Health at Different Spatial Resolutions.” Urban Ecosystems 22 (2): 315–24. <https://doi.org/10.1007/s11252-018-0813-3>.
+
+Bickel PJ, Doksum K (1981) "An Analysis of Transformation Revisited"
+JASA 76. <https://doi.org/10.2307/2287831>.
 
 ### Files
 
