@@ -1,8 +1,9 @@
 """
 naip_path: Create NAIP tracts path
 download_naip_tracts: Download NAIP Tracts
-ndvi_naip_one: Get stats for one NAIP tract
 ndvi_naip_df: Get stats for all NAIP tracts
+ndvi_naip_one: Get stats for one NAIP tract (internal)
+check_element_in_csv: Check value of element in CSV file (internal)
 """
 def naip_path(data_dir, place = 'chicago'):
     """
@@ -176,14 +177,14 @@ def ndvi_naip_one(tract_cdc_gdf, tract, tract_date_gdf):
 
 # total_pixels, veg_pixels, mean_patch_size, edge_density = ndvi_naip_one(tract_cdc_gdf, tract, tract_date_gdf)
     
-def ndvi_naip_df(naip_index_path, tract_cdc_gdf, naip_scenes_df):
+def ndvi_naip_df(naip_index_path, tract_cdc_gdf, naip_scenes_df = None):
     """
     Compute NDVI index for all NAIP tracts.
 
     Args:
         naip_index_path (str): address of NAIP tracts
         tract_cdc_gdf (gdf): gdf of CDC tracts
-        naip_scenes_df (df): df of scenes
+        naip_scenes_df (df, optional): df of scenes
     Returns:
         ndvi_stats_df (df): NDVI stats DataFrame
     """
@@ -191,28 +192,58 @@ def ndvi_naip_df(naip_index_path, tract_cdc_gdf, naip_scenes_df):
     import pandas as pd
     from tqdm.notebook import tqdm
     
-    # Skip this step if data are already downloaded 
+    # Skip this step if no `scenes_df` data provided. 
     if not naip_scenes_df is None:
         # Loop through the census tracts with URLs
         for tract, tract_date_gdf in tqdm(naip_scenes_df.groupby('tract')):
-            total_pixels, veg_pixels, mean_patch_size, edge_density = ndvi_naip_one(tract_cdc_gdf, tract, tract_date_gdf)
-            # Add a row to the statistics file for this tract
-            pd.DataFrame(dict(
-                tract=[tract],
-                total_pixels=[int(total_pixels)],
-                frac_veg=[float(veg_pixels/total_pixels)],
-                mean_patch_size=[mean_patch_size],
-                edge_density=[edge_density]
-            )).to_csv(
-                naip_index_path, 
-                mode='a', 
-                index=False, 
-                header=(not os.path.exists(naip_index_path))
-            )
+            # Check each tract to see if it is in `naip_index_path` CSV yet.
+            # This may be overkill as each time it checks them all. 
+            if not check_element_in_csv(naip_index_path, 'tract', tract):
+                total_pixels, veg_pixels, mean_patch_size, edge_density = ndvi_naip_one(tract_cdc_gdf, tract, tract_date_gdf)
+                # Add a row to the statistics file for this tract
+                pd.DataFrame(dict(
+                    tract=[tract],
+                    total_pixels=[int(total_pixels)],
+                    frac_veg=[float(veg_pixels/total_pixels)],
+                    mean_patch_size=[mean_patch_size],
+                    edge_density=[edge_density]
+                )).to_csv(
+                    naip_index_path, 
+                    mode='a', 
+                    index=False, 
+                    header=(not os.path.exists(naip_index_path))
+                )
 
     # Re-load results from file **error seems to be here**
-    ndvi_stats_df = pd.read_csv(naip_index_path)
+    ndvi_index_df = pd.read_csv(naip_index_path)
     
-    return ndvi_stats_df
+    return ndvi_index_df
 
-# ndvi_stats_df = ndvi_naip_df(naip_index_path, tract_cdc_gdf, naip_scenes_df)
+# ndvi_index_df = ndvi_naip_df(naip_index_path, tract_cdc_gdf, naip_scenes_df)
+
+def check_element_in_csv(filename, column_name, target_value):
+    """
+    Check value of element in CSV file.
+
+    Args:
+        filename (str): The path to the CSV file.
+        column_name (str): The name of the column to search in.
+        target_value: The value to search for.
+
+    Returns:
+        bool: True if the element is found, False otherwise.
+    """
+    import csv
+
+    try:
+        with open(filename, 'r') as csvfile:
+            reader = csv.DictReader(csvfile)
+            for row in reader:
+                if row[column_name] == str(target_value):
+                    return True
+        return False
+    except FileNotFoundError:
+         return False
+    
+
+# is_found = check_element_in_csv(naip_index_path, 'target', 123456789):

@@ -406,6 +406,29 @@ after computations, `ndvi_naip_df()`
 returns the `DataFrame`
 `ndvi_index_df`.
 
+Following is local. Probably do not need.
+
+```{python}
+# from landmapy.check header_csv, import get_last_row_csv, check_element_in_csv
+%run check.py
+```
+
+Code to check elements of CSV.
+
+```{python}
+header = header_csv(naip_index_path)
+last_row = get_last_row_csv(naip_index_path)
+print(header)
+print(last_row)
+check_element_in_csv(naip_index_path, header[0], last_row[0])
+```
+
+Following is duplicated in `naip.py`
+
+```{python}
+# check_naip_tracts(naip_index_path, chi_scenes_df)
+```
+
 ```{python}
 ndvi_index_df = ndvi_naip_df(naip_index_path, tract_cdc_gdf, chi_scenes_df)
 ```
