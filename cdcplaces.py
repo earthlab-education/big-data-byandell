@@ -170,6 +170,9 @@ def plot_gdf_gv(tract_cdc_gdf):
     Args:
        tract_cdc_gdf (gdf): combined gdf 
     """
+    import holoviews as hv
+    import hvplot.pandas
+    import hvplot.xarray
     import geoviews as gv
     from cartopy import crs as ccrs
 

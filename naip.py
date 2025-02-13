@@ -12,25 +12,25 @@ def naip_path(data_dir, place = 'chicago'):
         data_dir (str): data directory
         place (str): name of place
     Returns:
-        naip_stats_path (str): address of NAIP tracts
+        naip_index_path (str): address of NAIP tracts
     """
     import os
     
-    naip_stats_path = os.path.join(data_dir, f'{place}-naip-stats.csv')
+    naip_index_path = os.path.join(data_dir, f'{place}-naip-stats.csv')
 
-    return naip_stats_path
+    return naip_index_path
 
-# naip_stats_path = naip_path(data_dir, 'chicago')
+# naip_index_path = naip_path(data_dir, 'chicago')
 
-def download_naip_tracts(naip_stats_path, tract_cdc_gdf):
+def download_naip_scenes(naip_index_path, tract_cdc_gdf):
     """
-    Download NAIP Tracts.
+    Download NAIP Scene URLs.
     
     Args:
-        naip_path (str): NAIP tracts directory
+        naip_index_path (str): NAIP index CSV file address
         tract_cdc_gdf (gdf): gdf of combined place and disease
     Returns:
-        naip_stats_tracts (ndarray): naip tract values
+        scene_df (df): naip scenes DataFrame
     """
     import os
     import pandas as pd
@@ -38,18 +38,19 @@ def download_naip_tracts(naip_stats_path, tract_cdc_gdf):
     import pystac_client
     from tqdm.notebook import tqdm
     
-    # Connect to the planetary computer catalog
-    e84_catalog = pystac_client.Client.open(
-        "https://planetarycomputer.microsoft.com/api/stac/v1"
-    )
-    # Convert geometry to lat/lon for STAC
-    tract_latlon_gdf = tract_cdc_gdf.to_crs(4326)
-
     # Check for existing data - do not access duplicate tracts
     downloaded_tracts = []
-    if os.path.exists(naip_stats_path):
-        naip_stats_df = pd.read_csv(naip_stats_path)
+    if os.path.exists(naip_index_path):
+        naip_index_df = pd.read_csv(naip_index_path)
+        downloaded_tracts = naip_index_df.tract.values
     else:
+        # Connect to the planetary computer catalog
+        e84_catalog = pystac_client.Client.open(
+            "https://planetarycomputer.microsoft.com/api/stac/v1"
+        )
+        # Convert geometry to lat/lon for STAC
+        tract_latlon_gdf = tract_cdc_gdf.to_crs(4326)
+
         # Download asthma data (only once)
         print('No census tracts downloaded so far')
         # Loop through each census tract
@@ -91,16 +92,14 @@ def download_naip_tracts(naip_stats_path, tract_cdc_gdf):
             
         # Concatenate the url dataframes
         if scene_dfs:
-            naip_stats_df = pd.concat(scene_dfs).reset_index(drop=True)
-            naip_stats_df.to_csv(naip_stats_path, index=False)
+            naip_scenes_df = pd.concat(scene_dfs).reset_index(drop=True)
         else:
-            naip_stats_df = None
+            naip_scenes_df = None
 
-    return naip_stats_df
+    return naip_scenes_df
 
-# naip_stats_path = naip_path(data_dir, 'chicago')
-# naip_stats_df = download_naip_tracts(naip_stats_path, tract_cdc_gdf)
-# naip_stats_df.tract.values
+# naip_index_path = naip_path(data_dir, 'chicago')
+# naip_scenes_df = download_naip_scenes(naip_index_path, tract_cdc_gdf)
 
 def ndvi_naip_one(tract_cdc_gdf, tract, tract_date_gdf):
     """
@@ -177,14 +176,14 @@ def ndvi_naip_one(tract_cdc_gdf, tract, tract_date_gdf):
 
 # total_pixels, veg_pixels, mean_patch_size, edge_density = ndvi_naip_one(tract_cdc_gdf, tract, tract_date_gdf)
     
-def ndvi_naip_df(naip_stats_path, tract_cdc_gdf, scene_df):
+def ndvi_naip_df(naip_index_path, tract_cdc_gdf, naip_scenes_df):
     """
-    Get stats for all NAIP tracts.
+    Compute NDVI index for all NAIP tracts.
 
     Args:
-        naip_stats_path (str): address of NAIP tracts
+        naip_index_path (str): address of NAIP tracts
         tract_cdc_gdf (gdf): gdf of CDC tracts
-        scene_df (df): df of scene
+        naip_scenes_df (df): df of scenes
     Returns:
         ndvi_stats_df (df): NDVI stats DataFrame
     """
@@ -193,9 +192,9 @@ def ndvi_naip_df(naip_stats_path, tract_cdc_gdf, scene_df):
     from tqdm.notebook import tqdm
     
     # Skip this step if data are already downloaded 
-    if not scene_df is None:
+    if not naip_scenes_df is None:
         # Loop through the census tracts with URLs
-        for tract, tract_date_gdf in tqdm(scene_df.groupby('tract')):
+        for tract, tract_date_gdf in tqdm(naip_scenes_df.groupby('tract')):
             total_pixels, veg_pixels, mean_patch_size, edge_density = ndvi_naip_one(tract_cdc_gdf, tract, tract_date_gdf)
             # Add a row to the statistics file for this tract
             pd.DataFrame(dict(
@@ -205,15 +204,15 @@ def ndvi_naip_df(naip_stats_path, tract_cdc_gdf, scene_df):
                 mean_patch_size=[mean_patch_size],
                 edge_density=[edge_density]
             )).to_csv(
-                naip_stats_path, 
+                naip_index_path, 
                 mode='a', 
                 index=False, 
-                header=(not os.path.exists(naip_stats_path))
+                header=(not os.path.exists(naip_index_path))
             )
 
-    # Re-load results from file
-    ndvi_stats_df = pd.read_csv(naip_stats_path)
+    # Re-load results from file **error seems to be here**
+    ndvi_stats_df = pd.read_csv(naip_index_path)
     
     return ndvi_stats_df
 
-# ndvi_stats_df = ndvi_naip_df(naip_stats_path, tract_cdc_gdf, scene_df)
+# ndvi_stats_df = ndvi_naip_df(naip_index_path, tract_cdc_gdf, naip_scenes_df)
