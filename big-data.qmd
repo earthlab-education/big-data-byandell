@@ -95,48 +95,16 @@ we recommend some settings to make sure your code does not get stopped
 by a momentary connection lapse – see the code cell below.
 
 ```{python}
-# pip install --quiet ~/Documents/GitHub/landmapy
-```
-
-```
-# Import libraries
-import os
-import pathlib
-import time
-import warnings
-
-import geopandas as gpd
-import geoviews as gv
-import holoviews as hv
-import hvplot.pandas
-import hvplot.xarray
-import numpy as np
-import pandas as pd
-import pystac_client
-import rioxarray as rxr
-import rioxarray.merge as rxrmerge
-import shapely
-import xarray as xr
-from cartopy import crs as ccrs
-from scipy.ndimage import convolve
-from sklearn.model_selection import KFold
-from scipy.ndimage import label
-from sklearn.linear_model import LinearRegression
-from sklearn.model_selection import train_test_split
-from tqdm.notebook import tqdm
+pip install --quiet ~/Documents/GitHub/landmapy
 ```
 
 ```{python}
-import os
-import warnings
-from landmapy.habitat import create_data_dir
-data_dir = create_data_dir('chicago-greenspace')
-    
-warnings.simplefilter('ignore')
+from landmapy.habitat import robust_code, create_data_dir
+```
 
-# Prevent GDAL from quitting due to momentary disruptions
-os.environ["GDAL_HTTP_MAX_RETRY"] = "5"
-os.environ["GDAL_HTTP_RETRY_DELAY"] = "1"
+```{python}
+robust_code()
+data_dir = create_data_dir('chicago-greenspace')
 ```
 
 ## STEP 2: Create a site map
@@ -172,10 +140,7 @@ There is no need to cache the full dataset – stick with your pared down
 version containing only Chicago.
 
 ```{python}
-# from landmapy.cdcplaces import shp_tract_path, download_census_tract
-# from landmapy.cdcplaces import hvplot_tract_gdf download_cdc_disease
-# from landmapy.cdcplaces import join_tract_cdc plot_gdf_gv
-%run cdcplaces.py
+from landmapy.cdcplaces import shp_tract_path, download_census_tract, hvplot_tract_gdf
 ```
 
 ```{python}
@@ -185,6 +150,8 @@ chi_tract_gdf = download_census_tract(tract_path, 'Chicago')
 ```
 
 ```{python}
+#| label: fig-sitemap
+#| fig-cap: "Chicago Tract"
 hvplot_tract_gdf(chi_tract_gdf)
 ```
 
@@ -237,6 +204,11 @@ downloaded. You can find more information on the
 selecting a subset of columns.
 
 ```{python}
+from landmapy.cdcplaces import download_cdc_disease, join_tract_cdc, plot_gdf_gv
+from landmapy.naip import naip_path, download_naip_scenes, ndvi_naip_df
+```
+
+```{python}
 # Preview asthma data
 cdc_df = download_cdc_disease(data_dir, 'asthma')
 cdc_df
@@ -257,6 +229,8 @@ your download.
 
 
 ```{python}
+#| label: fig-healthmap
+#| fig-cap: "Asthma Disease Severity"
 tract_cdc_gdf = join_tract_cdc(chi_tract_gdf, cdc_df)
 plot_gdf_gv(tract_cdc_gdf)
 ```
@@ -294,11 +268,6 @@ times when you get the `pystac_client.exceptions.APIError`
 > step at a time, making sure to test your work. You also probably want
 > to add a `break` into your loop to stop the loop after a single
 > iteration. This will help prevent long waits during debugging.
-
-```{python}
-# from landmapy.naip import naip_path, download_naip_tracks, ndvi_naip_df
-%run naip.py
-```
 
 Download NAIP scenes if not done already.
 Might want special case if some index values already downloaded.
@@ -406,29 +375,6 @@ after computations, `ndvi_naip_df()`
 returns the `DataFrame`
 `ndvi_index_df`.
 
-Following is local. Probably do not need.
-
-```{python}
-# from landmapy.check header_csv, import get_last_row_csv, check_element_in_csv
-%run check.py
-```
-
-Code to check elements of CSV.
-
-```{python}
-header = header_csv(naip_index_path)
-last_row = get_last_row_csv(naip_index_path)
-print(header)
-print(last_row)
-check_element_in_csv(naip_index_path, header[0], last_row[0])
-```
-
-Following is duplicated in `naip.py`
-
-```{python}
-# check_naip_tracts(naip_index_path, chi_scenes_df)
-```
-
 ```{python}
 ndvi_index_df = ndvi_naip_df(naip_index_path, tract_cdc_gdf, chi_scenes_df)
 ```
@@ -448,11 +394,14 @@ Create a plot that contains:
 - Make sure to include a title and labeled color bars
 
 ```{python}
-# from landmapy.explore import merge_ndvi_cdc, plot_ndvi_stats
-%run explore.py
+from landmapy.explore import merge_ndvi_cdc, plot_ndvi_index
+from landmapy.explore import var_trans, hvplot_matrix
+from landmapy.explore import train_test, plot_train_test, plot_resid
 ```
 
 ```{python}
+#| label: fig-modelfit
+#| fig-cap: "Asthma and Edge Density Chloropleths"
 ndvi_cdc_gdf = merge_ndvi_cdc(tract_cdc_gdf, ndvi_index_df)
 model_fit = plot_ndvi_index(ndvi_cdc_gdf)
 model_fit
@@ -528,6 +477,8 @@ Use the `.dropna()` method to drop rows with `NaN` values.
 - Explain any data transformations or selections you made and why
 
 ```{python}
+#| label: fig-plotmatrix
+#| fig-cap: "Plot Matrix"
 logndvi_cdc_gdf = var_trans(ndvi_cdc_gdf)
 hvplot_matrix(logndvi_cdc_gdf)
 ```
@@ -553,6 +504,8 @@ split your data into training and testing datasets with
 the following plotting code as a starting point.
 
 ```{python}
+#| label: fig-traintest
+#| fig-cap: "Observed vs Predicted Asthma"
 logndvi_cdc_test, reg = train_test(logndvi_cdc_gdf)
 plot_train_test(logndvi_cdc_test)
 ```
@@ -581,6 +534,8 @@ resid = plot_resid(logndvi_cdc_gdf, reg, yvar='asthma')
 ```
 
 ```{python}
+#| label: fig-resid
+#| fig-cap: "Mapped Residuals for Asthma Model"
 (
     model_fit[0] + resid + model_fit[1]
 )
