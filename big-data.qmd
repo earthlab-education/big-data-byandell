@@ -3,6 +3,7 @@ title: "Big Data: Urban Landscape"
 format:
   html:
     code-fold: true
+    keep-md: false
 ---
 
 ```{python}
@@ -95,11 +96,11 @@ we recommend some settings to make sure your code does not get stopped
 by a momentary connection lapse – see the code cell below.
 
 ```{python}
-pip install --quiet ~/Documents/GitHub/landmapy
+#pip install --quiet ~/Documents/GitHub/landmapy
 ```
 
 ```{python}
-from landmapy.habitat import robust_code, create_data_dir
+from landmapy.initial import robust_code, create_data_dir
 ```
 
 ```{python}
@@ -140,7 +141,8 @@ There is no need to cache the full dataset – stick with your pared down
 version containing only Chicago.
 
 ```{python}
-from landmapy.cdcplaces import shp_tract_path, download_census_tract, hvplot_tract_gdf
+from landmapy.cdcplaces import shp_tract_path, download_census_tract
+from landmapy.hvplot import hvplot_tract_gdf
 ```
 
 ```{python}
@@ -150,10 +152,16 @@ chi_tract_gdf = download_census_tract(tract_path, 'Chicago')
 ```
 
 ```{python}
-#| label: fig-sitemap
-#| fig-cap: "Chicago Tract"
-hvplot_tract_gdf(chi_tract_gdf)
+chi_tract_hv = hvplot_tract_gdf(chi_tract_gdf)
+chi_tract_hv
 ```
+
+```{python}
+import hvplot.pandas
+hvplot.save(chi_tract_hv, "tract_chi.html")
+```
+
+**NOW NEED TO incorporate this image**
 
 **Reflect and Respond**
 
@@ -204,7 +212,8 @@ downloaded. You can find more information on the
 selecting a subset of columns.
 
 ```{python}
-from landmapy.cdcplaces import download_cdc_disease, join_tract_cdc, plot_gdf_gv
+from landmapy.cdcplaces import download_cdc_disease, join_tract_cdc
+from landmapy.plot import plot_gdf_esri
 from landmapy.naip import naip_path, download_naip_scenes, ndvi_naip_df
 ```
 
@@ -232,7 +241,7 @@ your download.
 #| label: fig-healthmap
 #| fig-cap: "Asthma Disease Severity"
 tract_cdc_gdf = join_tract_cdc(chi_tract_gdf, cdc_df)
-plot_gdf_gv(tract_cdc_gdf)
+plot_gdf_esri(tract_cdc_gdf)
 ```
 
 **Reflect and Respond**
@@ -394,16 +403,15 @@ Create a plot that contains:
 - Make sure to include a title and labeled color bars
 
 ```{python}
-from landmapy.explore import merge_ndvi_cdc, plot_ndvi_index
-from landmapy.explore import var_trans, hvplot_matrix
-from landmapy.explore import train_test, plot_train_test, plot_resid
+from landmapy.naip import merge_ndvi_cdc
+from landmapy.explore import var_trans, train_test
+from landmapy.gvplot import gvplot_ndvi_index, gvplot_resid
+from landmapy.plot import plot_matrix, plot_train_test
 ```
 
 ```{python}
-#| label: fig-modelfit
-#| fig-cap: "Asthma and Edge Density Chloropleths"
 ndvi_cdc_gdf = merge_ndvi_cdc(tract_cdc_gdf, ndvi_index_df)
-model_fit = plot_ndvi_index(ndvi_cdc_gdf)
+model_fit = gvplot_ndvi_index(ndvi_cdc_gdf)
 model_fit
 ```
 
@@ -478,9 +486,9 @@ Use the `.dropna()` method to drop rows with `NaN` values.
 
 ```{python}
 #| label: fig-plotmatrix
-#| fig-cap: "Plot Matrix"
+#| fig-cap: "Model Matrix"
 logndvi_cdc_gdf = var_trans(ndvi_cdc_gdf)
-hvplot_matrix(logndvi_cdc_gdf)
+plot_matrix(logndvi_cdc_gdf)
 ```
 
 **EXPLAIN YOUR SELECTION AND TRANSFORMATION PROCESS HERE**
@@ -530,15 +538,17 @@ autocorrelation (as part of the variance-covariance structure).
 some possible explanations for any bias you see in your model?
 
 ```{python}
-resid = plot_resid(logndvi_cdc_gdf, reg, yvar='asthma')
+resid = gvplot_resid(logndvi_cdc_gdf, reg, yvar='asthma')
 ```
 
 ```{python}
-#| label: fig-resid
-#| fig-cap: "Mapped Residuals for Asthma Model"
-(
-    model_fit[0] + resid + model_fit[1]
-)
+# #| label: fig-resid
+# #| fig-cap: "Mapped Residuals for Asthma Model"
+models_gv = (model_fit[0] + resid + model_fit[1])
+import holoviews as hv
+hv.save(models_gv, 'bigdata_model.html')
+
+models_gv
 ```
 
 **Reflect and Respond**
