@@ -142,7 +142,6 @@ version containing only Chicago.
 
 ```{python}
 from landmapy.cdcplaces import shp_tract_path, download_census_tract
-from landmapy.hvplot import hvplot_tract_gdf
 ```
 
 ```{python}
@@ -151,12 +150,13 @@ tract_path = shp_tract_path(data_dir, 'chicago-tract')
 chi_tract_gdf = download_census_tract(tract_path, 'Chicago')
 ```
 
-```{python}
-chi_tract_hv = hvplot_tract_gdf(chi_tract_gdf)
-```
+Code to save HV plot:
 
-```{python}
+```
 import hvplot.pandas
+from landmapy.hvplot import hvplot_tract_gdf
+
+chi_tract_hv = hvplot_tract_gdf(chi_tract_gdf)
 hvplot.save(chi_tract_hv, "chi_tract.html")
 ```
 
@@ -404,7 +404,6 @@ Create a plot that contains:
 ```{python}
 from landmapy.naip import merge_ndvi_cdc
 from landmapy.explore import var_trans, train_test
-from landmapy.gvplot import gvplot_ndvi_index, gvplot_resid
 from landmapy.plot import plot_gdfs_map, plot_matrix, plot_train_test
 ```
 
@@ -540,7 +539,18 @@ some possible explanations for any bias you see in your model?
 ```{python}
 #| label: fig-resid
 plot_gdfs_map(logndvi_cdc_gdf, column=['asthma','resid','edge_density'], color=['Blues','RdBu','Greens'])
-#resid = gvplot_resid(logndvi_cdc_gdf, reg, yvar='asthma')
+```
+
+GeoViews code not shown:
+
+```
+import holoviews as hv
+from landmapy.gvplot import gvplot_ndvi_index, gvplot_resid
+
+model_fit = gvplot_ndvi_index(ndvi_cdc_gdf)
+resid = gvplot_resid(logndvi_cdc_gdf, reg, yvar='asthma')
+models_gv = (model_fit[0] + resid + model_fit[1])
+hv.save(models_gv, 'bigdata_model.html')
 ```
 
 **Reflect and Respond**

@@ -144,7 +144,6 @@ version containing only Chicago.
 ::: {.cell execution_count="5"}
 ``` {.python .cell-code}
 from landmapy.cdcplaces import shp_tract_path, download_census_tract
-from landmapy.hvplot import hvplot_tract_gdf
 ```
 :::
 
@@ -156,249 +155,13 @@ chi_tract_gdf = download_census_tract(tract_path, 'Chicago')
 ```
 :::
 
-:::::::::: {.cell execution_count="7"}
-``` {.python .cell-code}
-chi_tract_hv = hvplot_tract_gdf(chi_tract_gdf)
-```
+Code to save HV plot:
 
-::: {.cell-output .cell-output-display}
-<script type="esms-options">{"shimMode": true}</script><style>*[data-root-id],
-*[data-root-id] > * {
-  box-sizing: border-box;
-  font-family: var(--jp-ui-font-family);
-  font-size: var(--jp-ui-font-size1);
-  color: var(--vscode-editor-foreground, var(--jp-ui-font-color1));
-}
+    import hvplot.pandas
+    from landmapy.hvplot import hvplot_tract_gdf
 
-/* Override VSCode background color */
-.cell-output-ipywidget-background:has(
-    > .cell-output-ipywidget-background > .lm-Widget > *[data-root-id]
-  ),
-.cell-output-ipywidget-background:has(> .lm-Widget > *[data-root-id]) {
-  background-color: transparent !important;
-}
-</style>
-:::
-
-::: {.cell-output .cell-output-display}
-    Unable to display output for mime type(s): application/javascript, application/vnd.holoviews_load.v0+json
-:::
-
-::: {.cell-output .cell-output-display}
-    Unable to display output for mime type(s): application/javascript, application/vnd.holoviews_load.v0+json
-:::
-
-::: {.cell-output .cell-output-display}
-<div id='4574d557-b6b6-408f-b5aa-6f5732a91f92'>
-  <div id="b3b06f38-c18b-4e5a-bf74-f9b0d76231b2" data-root-id="4574d557-b6b6-408f-b5aa-6f5732a91f92" style="display: contents;"></div>
-</div>
-<script type="application/javascript">(function(root) {
-  var docs_json = {"569cf62b-d3e6-4a46-8db2-dc1e189f76b5":{"version":"3.5.2","title":"Bokeh Application","roots":[{"type":"object","name":"panel.models.browser.BrowserInfo","id":"4574d557-b6b6-408f-b5aa-6f5732a91f92"},{"type":"object","name":"panel.models.comm_manager.CommManager","id":"e60cdc35-fdac-4cb6-901c-e91125ba9f07","attributes":{"plot_id":"4574d557-b6b6-408f-b5aa-6f5732a91f92","comm_id":"31335122ee9f449aa54d63b2ca98a9cc","client_comm_id":"b732e4ba26d04023b13fa4f71b3d38bd"}}],"defs":[{"type":"model","name":"ReactiveHTML1"},{"type":"model","name":"FlexBox1","properties":[{"name":"align_content","kind":"Any","default":"flex-start"},{"name":"align_items","kind":"Any","default":"flex-start"},{"name":"flex_direction","kind":"Any","default":"row"},{"name":"flex_wrap","kind":"Any","default":"wrap"},{"name":"gap","kind":"Any","default":""},{"name":"justify_content","kind":"Any","default":"flex-start"}]},{"type":"model","name":"FloatPanel1","properties":[{"name":"config","kind":"Any","default":{"type":"map"}},{"name":"contained","kind":"Any","default":true},{"name":"position","kind":"Any","default":"right-top"},{"name":"offsetx","kind":"Any","default":null},{"name":"offsety","kind":"Any","default":null},{"name":"theme","kind":"Any","default":"primary"},{"name":"status","kind":"Any","default":"normalized"}]},{"type":"model","name":"GridStack1","properties":[{"name":"mode","kind":"Any","default":"warn"},{"name":"ncols","kind":"Any","default":null},{"name":"nrows","kind":"Any","default":null},{"name":"allow_resize","kind":"Any","default":true},{"name":"allow_drag","kind":"Any","default":true},{"name":"state","kind":"Any","default":[]}]},{"type":"model","name":"drag1","properties":[{"name":"slider_width","kind":"Any","default":5},{"name":"slider_color","kind":"Any","default":"black"},{"name":"value","kind":"Any","default":50}]},{"type":"model","name":"click1","properties":[{"name":"terminal_output","kind":"Any","default":""},{"name":"debug_name","kind":"Any","default":""},{"name":"clears","kind":"Any","default":0}]},{"type":"model","name":"FastWrapper1","properties":[{"name":"object","kind":"Any","default":null},{"name":"style","kind":"Any","default":null}]},{"type":"model","name":"NotificationAreaBase1","properties":[{"name":"js_events","kind":"Any","default":{"type":"map"}},{"name":"position","kind":"Any","default":"bottom-right"},{"name":"_clear","kind":"Any","default":0}]},{"type":"model","name":"NotificationArea1","properties":[{"name":"js_events","kind":"Any","default":{"type":"map"}},{"name":"notifications","kind":"Any","default":[]},{"name":"position","kind":"Any","default":"bottom-right"},{"name":"_clear","kind":"Any","default":0},{"name":"types","kind":"Any","default":[{"type":"map","entries":[["type","warning"],["background","#ffc107"],["icon",{"type":"map","entries":[["className","fas fa-exclamation-triangle"],["tagName","i"],["color","white"]]}]]},{"type":"map","entries":[["type","info"],["background","#007bff"],["icon",{"type":"map","entries":[["className","fas fa-info-circle"],["tagName","i"],["color","white"]]}]]}]}]},{"type":"model","name":"Notification","properties":[{"name":"background","kind":"Any","default":null},{"name":"duration","kind":"Any","default":3000},{"name":"icon","kind":"Any","default":null},{"name":"message","kind":"Any","default":""},{"name":"notification_type","kind":"Any","default":null},{"name":"_destroyed","kind":"Any","default":false}]},{"type":"model","name":"TemplateActions1","properties":[{"name":"open_modal","kind":"Any","default":0},{"name":"close_modal","kind":"Any","default":0}]},{"type":"model","name":"BootstrapTemplateActions1","properties":[{"name":"open_modal","kind":"Any","default":0},{"name":"close_modal","kind":"Any","default":0}]},{"type":"model","name":"TemplateEditor1","properties":[{"name":"layout","kind":"Any","default":[]}]},{"type":"model","name":"MaterialTemplateActions1","properties":[{"name":"open_modal","kind":"Any","default":0},{"name":"close_modal","kind":"Any","default":0}]},{"type":"model","name":"ReactiveESM1","properties":[{"name":"esm_constants","kind":"Any","default":{"type":"map"}}]},{"type":"model","name":"JSComponent1","properties":[{"name":"esm_constants","kind":"Any","default":{"type":"map"}}]},{"type":"model","name":"ReactComponent1","properties":[{"name":"esm_constants","kind":"Any","default":{"type":"map"}}]},{"type":"model","name":"AnyWidgetComponent1","properties":[{"name":"esm_constants","kind":"Any","default":{"type":"map"}}]},{"type":"model","name":"request_value1","properties":[{"name":"fill","kind":"Any","default":"none"},{"name":"_synced","kind":"Any","default":null},{"name":"_request_sync","kind":"Any","default":0}]}]}};
-  var render_items = [{"docid":"569cf62b-d3e6-4a46-8db2-dc1e189f76b5","roots":{"4574d557-b6b6-408f-b5aa-6f5732a91f92":"b3b06f38-c18b-4e5a-bf74-f9b0d76231b2"},"root_ids":["4574d557-b6b6-408f-b5aa-6f5732a91f92"]}];
-  var docs = Object.values(docs_json)
-  if (!docs) {
-    return
-  }
-  const py_version = docs[0].version.replace('rc', '-rc.').replace('.dev', '-dev.')
-  async function embed_document(root) {
-    var Bokeh = get_bokeh(root)
-    await Bokeh.embed.embed_items_notebook(docs_json, render_items);
-    for (const render_item of render_items) {
-      for (const root_id of render_item.root_ids) {
-    const id_el = document.getElementById(root_id)
-    if (id_el.children.length && id_el.children[0].hasAttribute('data-root-id')) {
-      const root_el = id_el.children[0]
-      root_el.id = root_el.id + '-rendered'
-      for (const child of root_el.children) {
-            // Ensure JupyterLab does not capture keyboard shortcuts
-            // see: https://jupyterlab.readthedocs.io/en/4.1.x/extension/notebook.html#keyboard-interaction-model
-        child.setAttribute('data-lm-suppress-shortcuts', 'true')
-      }
-    }
-      }
-    }
-  }
-  function get_bokeh(root) {
-    if (root.Bokeh === undefined) {
-      return null
-    } else if (root.Bokeh.version !== py_version) {
-      if (root.Bokeh.versions === undefined || !root.Bokeh.versions.has(py_version)) {
-    return null
-      }
-      return root.Bokeh.versions.get(py_version);
-    } else if (root.Bokeh.version === py_version) {
-      return root.Bokeh
-    }
-    return null
-  }
-  function is_loaded(root) {
-    var Bokeh = get_bokeh(root)
-    return (Bokeh != null && Bokeh.Panel !== undefined)
-  }
-  if (is_loaded(root)) {
-    embed_document(root);
-  } else {
-    var attempts = 0;
-    var timer = setInterval(function(root) {
-      if (is_loaded(root)) {
-        clearInterval(timer);
-        embed_document(root);
-      } else if (document.readyState == "complete") {
-        attempts++;
-        if (attempts > 200) {
-          clearInterval(timer);
-      var Bokeh = get_bokeh(root)
-      if (Bokeh == null || Bokeh.Panel == null) {
-            console.warn("Panel: ERROR: Unable to run Panel code because Bokeh or Panel library is missing");
-      } else {
-        console.warn("Panel: WARNING: Attempting to render but not all required libraries could be resolved.")
-        embed_document(root)
-      }
-        }
-      }
-    }, 25, root)
-  }
-})(window);</script>
-:::
-
-::: {.cell-output .cell-output-display}
-<script type="esms-options">{"shimMode": true}</script><style>*[data-root-id],
-*[data-root-id] > * {
-  box-sizing: border-box;
-  font-family: var(--jp-ui-font-family);
-  font-size: var(--jp-ui-font-size1);
-  color: var(--vscode-editor-foreground, var(--jp-ui-font-color1));
-}
-
-/* Override VSCode background color */
-.cell-output-ipywidget-background:has(
-    > .cell-output-ipywidget-background > .lm-Widget > *[data-root-id]
-  ),
-.cell-output-ipywidget-background:has(> .lm-Widget > *[data-root-id]) {
-  background-color: transparent !important;
-}
-</style>
-:::
-
-::: {.cell-output .cell-output-display}
-    Unable to display output for mime type(s): application/javascript, application/vnd.holoviews_load.v0+json
-:::
-
-::: {.cell-output .cell-output-display}
-    Unable to display output for mime type(s): application/javascript, application/vnd.holoviews_load.v0+json
-:::
-::::::::::
-
-:::::::: {.cell execution_count="8"}
-``` {.python .cell-code}
-import hvplot.pandas
-hvplot.save(chi_tract_hv, "chi_tract.html")
-```
-
-::: {.cell-output .cell-output-display}
-<script type="esms-options">{"shimMode": true}</script><style>*[data-root-id],
-*[data-root-id] > * {
-  box-sizing: border-box;
-  font-family: var(--jp-ui-font-family);
-  font-size: var(--jp-ui-font-size1);
-  color: var(--vscode-editor-foreground, var(--jp-ui-font-color1));
-}
-
-/* Override VSCode background color */
-.cell-output-ipywidget-background:has(
-    > .cell-output-ipywidget-background > .lm-Widget > *[data-root-id]
-  ),
-.cell-output-ipywidget-background:has(> .lm-Widget > *[data-root-id]) {
-  background-color: transparent !important;
-}
-</style>
-:::
-
-::: {.cell-output .cell-output-display}
-    Unable to display output for mime type(s): application/javascript, application/vnd.holoviews_load.v0+json
-:::
-
-::: {.cell-output .cell-output-display}
-    Unable to display output for mime type(s): application/javascript, application/vnd.holoviews_load.v0+json
-:::
-
-::: {.cell-output .cell-output-display}
-<div id='75291d1b-f62a-4c86-99b8-4380d611b3bf'>
-  <div id="bf1ed17b-8b74-49b2-955b-637fabce011b" data-root-id="75291d1b-f62a-4c86-99b8-4380d611b3bf" style="display: contents;"></div>
-</div>
-<script type="application/javascript">(function(root) {
-  var docs_json = {"c86f7912-427d-47ab-862e-79c2be70d748":{"version":"3.5.2","title":"Bokeh Application","roots":[{"type":"object","name":"panel.models.browser.BrowserInfo","id":"75291d1b-f62a-4c86-99b8-4380d611b3bf"},{"type":"object","name":"panel.models.comm_manager.CommManager","id":"c7e1239a-0d73-4ff9-aa57-15c87f3672cc","attributes":{"plot_id":"75291d1b-f62a-4c86-99b8-4380d611b3bf","comm_id":"cc501168cea6447f97b2f6f3c8a1c5ca","client_comm_id":"caed2be9c4e8458ea2e3403e6f7f432b"}}],"defs":[{"type":"model","name":"ReactiveHTML1"},{"type":"model","name":"FlexBox1","properties":[{"name":"align_content","kind":"Any","default":"flex-start"},{"name":"align_items","kind":"Any","default":"flex-start"},{"name":"flex_direction","kind":"Any","default":"row"},{"name":"flex_wrap","kind":"Any","default":"wrap"},{"name":"gap","kind":"Any","default":""},{"name":"justify_content","kind":"Any","default":"flex-start"}]},{"type":"model","name":"FloatPanel1","properties":[{"name":"config","kind":"Any","default":{"type":"map"}},{"name":"contained","kind":"Any","default":true},{"name":"position","kind":"Any","default":"right-top"},{"name":"offsetx","kind":"Any","default":null},{"name":"offsety","kind":"Any","default":null},{"name":"theme","kind":"Any","default":"primary"},{"name":"status","kind":"Any","default":"normalized"}]},{"type":"model","name":"GridStack1","properties":[{"name":"mode","kind":"Any","default":"warn"},{"name":"ncols","kind":"Any","default":null},{"name":"nrows","kind":"Any","default":null},{"name":"allow_resize","kind":"Any","default":true},{"name":"allow_drag","kind":"Any","default":true},{"name":"state","kind":"Any","default":[]}]},{"type":"model","name":"drag1","properties":[{"name":"slider_width","kind":"Any","default":5},{"name":"slider_color","kind":"Any","default":"black"},{"name":"value","kind":"Any","default":50}]},{"type":"model","name":"click1","properties":[{"name":"terminal_output","kind":"Any","default":""},{"name":"debug_name","kind":"Any","default":""},{"name":"clears","kind":"Any","default":0}]},{"type":"model","name":"FastWrapper1","properties":[{"name":"object","kind":"Any","default":null},{"name":"style","kind":"Any","default":null}]},{"type":"model","name":"NotificationAreaBase1","properties":[{"name":"js_events","kind":"Any","default":{"type":"map"}},{"name":"position","kind":"Any","default":"bottom-right"},{"name":"_clear","kind":"Any","default":0}]},{"type":"model","name":"NotificationArea1","properties":[{"name":"js_events","kind":"Any","default":{"type":"map"}},{"name":"notifications","kind":"Any","default":[]},{"name":"position","kind":"Any","default":"bottom-right"},{"name":"_clear","kind":"Any","default":0},{"name":"types","kind":"Any","default":[{"type":"map","entries":[["type","warning"],["background","#ffc107"],["icon",{"type":"map","entries":[["className","fas fa-exclamation-triangle"],["tagName","i"],["color","white"]]}]]},{"type":"map","entries":[["type","info"],["background","#007bff"],["icon",{"type":"map","entries":[["className","fas fa-info-circle"],["tagName","i"],["color","white"]]}]]}]}]},{"type":"model","name":"Notification","properties":[{"name":"background","kind":"Any","default":null},{"name":"duration","kind":"Any","default":3000},{"name":"icon","kind":"Any","default":null},{"name":"message","kind":"Any","default":""},{"name":"notification_type","kind":"Any","default":null},{"name":"_destroyed","kind":"Any","default":false}]},{"type":"model","name":"TemplateActions1","properties":[{"name":"open_modal","kind":"Any","default":0},{"name":"close_modal","kind":"Any","default":0}]},{"type":"model","name":"BootstrapTemplateActions1","properties":[{"name":"open_modal","kind":"Any","default":0},{"name":"close_modal","kind":"Any","default":0}]},{"type":"model","name":"TemplateEditor1","properties":[{"name":"layout","kind":"Any","default":[]}]},{"type":"model","name":"MaterialTemplateActions1","properties":[{"name":"open_modal","kind":"Any","default":0},{"name":"close_modal","kind":"Any","default":0}]},{"type":"model","name":"ReactiveESM1","properties":[{"name":"esm_constants","kind":"Any","default":{"type":"map"}}]},{"type":"model","name":"JSComponent1","properties":[{"name":"esm_constants","kind":"Any","default":{"type":"map"}}]},{"type":"model","name":"ReactComponent1","properties":[{"name":"esm_constants","kind":"Any","default":{"type":"map"}}]},{"type":"model","name":"AnyWidgetComponent1","properties":[{"name":"esm_constants","kind":"Any","default":{"type":"map"}}]},{"type":"model","name":"request_value1","properties":[{"name":"fill","kind":"Any","default":"none"},{"name":"_synced","kind":"Any","default":null},{"name":"_request_sync","kind":"Any","default":0}]}]}};
-  var render_items = [{"docid":"c86f7912-427d-47ab-862e-79c2be70d748","roots":{"75291d1b-f62a-4c86-99b8-4380d611b3bf":"bf1ed17b-8b74-49b2-955b-637fabce011b"},"root_ids":["75291d1b-f62a-4c86-99b8-4380d611b3bf"]}];
-  var docs = Object.values(docs_json)
-  if (!docs) {
-    return
-  }
-  const py_version = docs[0].version.replace('rc', '-rc.').replace('.dev', '-dev.')
-  async function embed_document(root) {
-    var Bokeh = get_bokeh(root)
-    await Bokeh.embed.embed_items_notebook(docs_json, render_items);
-    for (const render_item of render_items) {
-      for (const root_id of render_item.root_ids) {
-    const id_el = document.getElementById(root_id)
-    if (id_el.children.length && id_el.children[0].hasAttribute('data-root-id')) {
-      const root_el = id_el.children[0]
-      root_el.id = root_el.id + '-rendered'
-      for (const child of root_el.children) {
-            // Ensure JupyterLab does not capture keyboard shortcuts
-            // see: https://jupyterlab.readthedocs.io/en/4.1.x/extension/notebook.html#keyboard-interaction-model
-        child.setAttribute('data-lm-suppress-shortcuts', 'true')
-      }
-    }
-      }
-    }
-  }
-  function get_bokeh(root) {
-    if (root.Bokeh === undefined) {
-      return null
-    } else if (root.Bokeh.version !== py_version) {
-      if (root.Bokeh.versions === undefined || !root.Bokeh.versions.has(py_version)) {
-    return null
-      }
-      return root.Bokeh.versions.get(py_version);
-    } else if (root.Bokeh.version === py_version) {
-      return root.Bokeh
-    }
-    return null
-  }
-  function is_loaded(root) {
-    var Bokeh = get_bokeh(root)
-    return (Bokeh != null && Bokeh.Panel !== undefined)
-  }
-  if (is_loaded(root)) {
-    embed_document(root);
-  } else {
-    var attempts = 0;
-    var timer = setInterval(function(root) {
-      if (is_loaded(root)) {
-        clearInterval(timer);
-        embed_document(root);
-      } else if (document.readyState == "complete") {
-        attempts++;
-        if (attempts > 200) {
-          clearInterval(timer);
-      var Bokeh = get_bokeh(root)
-      if (Bokeh == null || Bokeh.Panel == null) {
-            console.warn("Panel: ERROR: Unable to run Panel code because Bokeh or Panel library is missing");
-      } else {
-        console.warn("Panel: WARNING: Attempting to render but not all required libraries could be resolved.")
-        embed_document(root)
-      }
-        }
-      }
-    }, 25, root)
-  }
-})(window);</script>
-:::
-
-::: {.cell-output .cell-output-stderr}
-    WARNING:bokeh.core.validation.check:W-1005 (FIXED_SIZING_MODE): 'fixed' sizing mode requires width and height to be set: figure(id='8db20219-eb80-4f96-937c-49d2dbe3f829', ...)
-:::
-::::::::
+    chi_tract_hv = hvplot_tract_gdf(chi_tract_gdf)
+    hvplot.save(chi_tract_hv, "chi_tract.html")
 
 **NOW NEED TO incorporate this image**
 
@@ -447,7 +210,7 @@ download. Selecting the state and county is one way to do this.
 -   You should also clean up this data by renaming the `'data_value'` to
     something descriptive, and possibly selecting a subset of columns.
 
-::: {.cell execution_count="9"}
+::: {.cell execution_count="7"}
 ``` {.python .cell-code}
 from landmapy.cdcplaces import download_cdc_disease, join_tract_cdc
 from landmapy.plot import plot_gdfs_map
@@ -455,14 +218,14 @@ from landmapy.naip import naip_path, download_naip_scenes, ndvi_naip_df
 ```
 :::
 
-:::: {.cell execution_count="10"}
+:::: {.cell execution_count="8"}
 ``` {.python .cell-code}
 # Preview asthma data
 cdc_df = download_cdc_disease(data_dir, 'asthma')
 cdc_df
 ```
 
-::: {.cell-output .cell-output-display execution_count="28"}
+::: {.cell-output .cell-output-display execution_count="24"}
 <div>
 <style scoped>
     .dataframe tbody tr th:only-of-type {
@@ -509,7 +272,7 @@ cdc_df
     the city missing, it may mean that you need to expand the record
     limit for your download.
 
-:::: {.cell execution_count="11"}
+:::: {.cell execution_count="9"}
 ``` {.python .cell-code}
 tract_cdc_gdf = join_tract_cdc(chi_tract_gdf, cdc_df)
 plot_gdfs_map(tract_cdc_gdf, column='asthma')
@@ -556,7 +319,7 @@ Access Catalog (STAC)](https://stacspec.org/en).
 Download NAIP scenes if not done already. Might want special case if
 some index values already downloaded.
 
-::: {.cell execution_count="12"}
+::: {.cell execution_count="10"}
 ``` {.python .cell-code}
 naip_index_path = naip_path(data_dir, 'chicago')    
 %store -r chi_scenes_df
@@ -654,7 +417,7 @@ density.
     `ndvi_naip_df()` (**need better name**) returns the `DataFrame`
     `ndvi_index_df`.
 
-:::: {.cell execution_count="13"}
+:::: {.cell execution_count="11"}
 ``` {.python .cell-code}
 ndvi_index_df = ndvi_naip_df(naip_index_path, tract_cdc_gdf, chi_scenes_df)
 ```
@@ -678,16 +441,15 @@ Create a plot that contains:
 -   Asthma prevelence on one and mean NDVI on the other
 -   Make sure to include a title and labeled color bars
 
-::: {.cell execution_count="14"}
+::: {.cell execution_count="12"}
 ``` {.python .cell-code}
 from landmapy.naip import merge_ndvi_cdc
 from landmapy.explore import var_trans, train_test
-from landmapy.gvplot import gvplot_ndvi_index, gvplot_resid
 from landmapy.plot import plot_gdfs_map, plot_matrix, plot_train_test
 ```
 :::
 
-:::: {.cell execution_count="15"}
+:::: {.cell execution_count="13"}
 ``` {.python .cell-code}
 ndvi_cdc_gdf = merge_ndvi_cdc(tract_cdc_gdf, ndvi_index_df)
 plot_gdfs_map(ndvi_cdc_gdf)
@@ -766,7 +528,7 @@ You can transform data:
     `.dropna()` method to drop rows with `NaN` values.
 -   Explain any data transformations or selections you made and why
 
-:::: {.cell execution_count="16"}
+:::: {.cell execution_count="14"}
 ``` {.python .cell-code}
 logndvi_cdc_gdf = var_trans(ndvi_cdc_gdf)
 plot_matrix(logndvi_cdc_gdf)
@@ -796,7 +558,7 @@ statistical significance is harder to derive mathematically.
 -   Plot the predicted values against the measured values. You can use
     the following plotting code as a starting point.
 
-:::: {.cell execution_count="17"}
+:::: {.cell execution_count="15"}
 ``` {.python .cell-code}
 logndvi_cdc_test, reg, logndvi_cdc_gdf = train_test(logndvi_cdc_gdf)
 plot_train_test(logndvi_cdc_test)
@@ -826,16 +588,25 @@ mean) or autocorrelation (as part of the variance-covariance structure).
 -   Looking at both of your error plots, what do you notice? What are
     some possible explanations for any bias you see in your model?
 
-:::: {.cell execution_count="18"}
+:::: {.cell execution_count="16"}
 ``` {.python .cell-code}
 plot_gdfs_map(logndvi_cdc_gdf, column=['asthma','resid','edge_density'], color=['Blues','RdBu','Greens'])
-#resid = gvplot_resid(logndvi_cdc_gdf, reg, yvar='asthma')
 ```
 
 ::: {.cell-output .cell-output-display}
 ![](big-data_files/figure-markdown/fig-resid-output-1.png){#fig-resid}
 :::
 ::::
+
+GeoViews code not shown:
+
+    import holoviews as hv
+    from landmapy.gvplot import gvplot_ndvi_index, gvplot_resid
+
+    model_fit = gvplot_ndvi_index(ndvi_cdc_gdf)
+    resid = gvplot_resid(logndvi_cdc_gdf, reg, yvar='asthma')
+    models_gv = (model_fit[0] + resid + model_fit[1])
+    hv.save(models_gv, 'bigdata_model.html')
 
 **Reflect and Respond**
 
