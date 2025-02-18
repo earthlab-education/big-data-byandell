@@ -153,12 +153,11 @@ chi_tract_gdf = download_census_tract(tract_path, 'Chicago')
 
 ```{python}
 chi_tract_hv = hvplot_tract_gdf(chi_tract_gdf)
-chi_tract_hv
 ```
 
 ```{python}
 import hvplot.pandas
-hvplot.save(chi_tract_hv, "tract_chi.html")
+hvplot.save(chi_tract_hv, "chi_tract.html")
 ```
 
 **NOW NEED TO incorporate this image**
@@ -213,7 +212,7 @@ selecting a subset of columns.
 
 ```{python}
 from landmapy.cdcplaces import download_cdc_disease, join_tract_cdc
-from landmapy.plot import plot_gdf_esri
+from landmapy.plot import plot_gdfs_map
 from landmapy.naip import naip_path, download_naip_scenes, ndvi_naip_df
 ```
 
@@ -241,7 +240,7 @@ your download.
 #| label: fig-healthmap
 #| fig-cap: "Asthma Disease Severity"
 tract_cdc_gdf = join_tract_cdc(chi_tract_gdf, cdc_df)
-plot_gdf_esri(tract_cdc_gdf)
+plot_gdfs_map(tract_cdc_gdf, column='asthma')
 ```
 
 **Reflect and Respond**
@@ -406,13 +405,14 @@ Create a plot that contains:
 from landmapy.naip import merge_ndvi_cdc
 from landmapy.explore import var_trans, train_test
 from landmapy.gvplot import gvplot_ndvi_index, gvplot_resid
-from landmapy.plot import plot_matrix, plot_train_test
+from landmapy.plot import plot_gdfs_map, plot_matrix, plot_train_test
 ```
 
 ```{python}
+#| label: fig-gdfsmap
+#| fig-cap: Asthma and Edge Density
 ndvi_cdc_gdf = merge_ndvi_cdc(tract_cdc_gdf, ndvi_index_df)
-model_fit = gvplot_ndvi_index(ndvi_cdc_gdf)
-model_fit
+plot_gdfs_map(ndvi_cdc_gdf)
 ```
 
 Do you see any similarities in your plots?
@@ -514,7 +514,7 @@ the following plotting code as a starting point.
 ```{python}
 #| label: fig-traintest
 #| fig-cap: "Observed vs Predicted Asthma"
-logndvi_cdc_test, reg = train_test(logndvi_cdc_gdf)
+logndvi_cdc_test, reg, logndvi_cdc_gdf = train_test(logndvi_cdc_gdf)
 plot_train_test(logndvi_cdc_test)
 ```
 
@@ -538,17 +538,9 @@ autocorrelation (as part of the variance-covariance structure).
 some possible explanations for any bias you see in your model?
 
 ```{python}
-resid = gvplot_resid(logndvi_cdc_gdf, reg, yvar='asthma')
-```
-
-```{python}
-# #| label: fig-resid
-# #| fig-cap: "Mapped Residuals for Asthma Model"
-models_gv = (model_fit[0] + resid + model_fit[1])
-import holoviews as hv
-hv.save(models_gv, 'bigdata_model.html')
-
-models_gv
+#| label: fig-resid
+plot_gdfs_map(logndvi_cdc_gdf, column=['asthma','resid','edge_density'], color=['Blues','RdBu','Greens'])
+#resid = gvplot_resid(logndvi_cdc_gdf, reg, yvar='asthma')
 ```
 
 **Reflect and Respond**
